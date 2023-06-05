@@ -70,12 +70,7 @@ cp .env.example .env
 After you set the `DATABASE` value in .env, you'll need it to match the `default` value in the `features` section in `Cargo.toml` with the `DATABASE` value in .env:
 
 ```toml
-[features]
-cockroach = []
-mysql = []
-postgres = []
-sqlite = []
-default = ["mysql"]
+default = ["postgres"]
 ```
 
 _note:_ Only supply a SINGLE database in the `default` array.
