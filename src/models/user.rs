@@ -3,15 +3,21 @@ use crate::database::PoolType;
 use crate::errors::ApiError;
 use crate::handlers::user::{UserResponse, UsersResponse};
 use crate::schema::users;
-use chrono::{NaiveDateTime, Utc};
+use chrono::{NaiveDateTime, NaiveDate, Utc};
 use diesel::prelude::*;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Queryable, Identifiable, Insertable)]
 pub struct User {
     pub id: String,
-    pub first_name: String,
-    pub last_name: String,
+    pub nome: String,
+    pub sobrenome: String,
+    pub cpf: String,
+    pub rg: String,
+    pub data_nascimento: NaiveDateTime,
+    pub sexo: String,
+    pub estado_civil: String,
+    pub telefone: String,
     pub email: String,
     pub password: String,
     pub created_by: String,
@@ -23,8 +29,14 @@ pub struct User {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NewUser {
     pub id: String,
-    pub first_name: String,
-    pub last_name: String,
+    pub nome: String,
+    pub sobrenome: String,
+    pub cpf: String,
+    pub rg: String,
+    pub data_nascimento: NaiveDateTime,
+    pub sexo: String,
+    pub estado_civil: String,
+    pub telefone: String,
     pub email: String,
     pub password: String,
     pub created_by: String,
@@ -35,8 +47,14 @@ pub struct NewUser {
 #[table_name = "users"]
 pub struct UpdateUser {
     pub id: String,
-    pub first_name: String,
-    pub last_name: String,
+    pub nome: String,
+    pub sobrenome: String,
+    pub cpf: String,
+    pub rg: String,
+    pub data_nascimento: NaiveDateTime,
+    pub sexo: String,
+    pub estado_civil: String,
+    pub telefone: String,
     pub email: String,
     pub updated_by: String,
 }
@@ -125,8 +143,14 @@ impl From<NewUser> for User {
     fn from(user: NewUser) -> Self {
         User {
             id: user.id,
-            first_name: user.first_name,
-            last_name: user.last_name,
+            nome: user.nome,
+            sobrenome: user.sobrenome,
+            cpf: user.cpf,
+            rg: user.rg,
+            data_nascimento: user.data_nascimento,
+            sexo: user.sexo,
+            estado_civil: user.estado_civil,
+            telefone: user.telefone,
             email: user.email,
             password: hash(&user.password),
             created_by: user.created_by,
@@ -151,8 +175,14 @@ pub mod tests {
         let user_id = Uuid::new_v4();
         let new_user = NewUser {
             id: user_id.to_string(),
-            first_name: "Model".to_string(),
-            last_name: "Test".to_string(),
+            nome: "Model".to_string(),
+            sobrenome: "Test".to_string(),
+            cpf: "12345678901".to_string(),
+            rg: "123456789".to_string(),
+            data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
+            sexo: "M".to_string(),
+            estado_civil: "Solteiro".to_string(),
+            telefone: "12345678901".to_string(),
             email: "model-test@nothing.org".to_string(),
             password: "123456".to_string(),
             created_by: user_id.to_string(),
@@ -198,8 +228,14 @@ pub mod tests {
         let user = &users.0[1];
         let update_user = UpdateUser {
             id: user.id.to_string(),
-            first_name: "ModelUpdate".to_string(),
-            last_name: "TestUpdate".to_string(),
+            nome: "ModelUpdate".to_string(),
+            sobrenome: "TestUpdate".to_string(),
+            cpf: "12345678901".to_string(),
+            rg: "123456789".to_string(),
+            data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
+            sexo: "M".to_string(),
+            estado_civil: "Solteiro".to_string(),
+            telefone: "12345678901".to_string(),
             email: "model-update-test@nothing.org".to_string(),
             updated_by: user.id.to_string(),
         };
@@ -214,8 +250,14 @@ pub mod tests {
         let user_id = Uuid::new_v4();
         let update_user = UpdateUser {
             id: user_id.to_string(),
-            first_name: "ModelUpdateFailure".to_string(),
-            last_name: "TestUpdateFailure".to_string(),
+            nome: "ModelUpdateFailure".to_string(),
+            sobrenome: "TestUpdateFailure".to_string(),
+            cpf: "12345678901".to_string(),
+            rg: "123456789".to_string(),
+            data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
+            sexo: "M".to_string(),
+            estado_civil: "Solteiro".to_string(),
+            telefone: "12345678901".to_string(),
             email: "model-update-failure-test@nothing.org".to_string(),
             updated_by: user_id.to_string(),
         };

@@ -41,13 +41,13 @@ mod tests {
   pub struct TestRequest {
     #[validate(length(
       min = 3,
-      message = "first_name is required and must be at least 3 characters"
+      message = "nome is required and must be at least 3 characters"
     ))]
-    pub first_name: String,
+    pub nome: String,
   }
 
   fn get_test_request() -> TestRequest {
-    let json = json!({"first_name": "a"});
+    let json = json!({"nome": "a"});
     serde_json::from_value::<TestRequest>(json).unwrap()
   }
 
@@ -64,7 +64,7 @@ mod tests {
     let request = get_test_request();
     let response = validate(&Json(request)).unwrap_err();
     let expected_error = ApiError::ValidationError(vec![
-      "first_name is required and must be at least 3 characters".to_string(),
+      "nome is required and must be at least 3 characters".to_string(),
     ]);
     assert_eq!(response, expected_error);
   }

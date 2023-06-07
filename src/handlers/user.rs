@@ -8,12 +8,19 @@ use rayon::prelude::*;
 use serde::Serialize;
 use uuid::Uuid;
 use validator::Validate;
+use chrono::{NaiveDateTime, NaiveDate};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct UserResponse {
     pub id: Uuid,
-    pub first_name: String,
-    pub last_name: String,
+    pub nome: String,
+    pub sobrenome: String,
+    pub cpf: String,
+    pub rg: String,
+    pub data_nascimento: NaiveDateTime,
+    pub sexo: String,
+    pub estado_civil: String,
+    pub telefone: String,
     pub email: String,
 }
 
@@ -24,22 +31,54 @@ pub struct UsersResponse(pub Vec<UserResponse>);
 pub struct CreateUserRequest {
     #[validate(length(
         min = 3,
-        message = "first_name is required and must be at least 3 characters"
+        message = "O primeiro nome deve ter pelo menos 3 caracteres"
     ))]
-    pub first_name: String,
+    pub nome: String,
 
     #[validate(length(
         min = 3,
-        message = "last_name is required and must be at least 3 characters"
+        message = "O sobrenome deve ter pelo menos 3 caracteres"
     ))]
-    pub last_name: String,
+    pub sobrenome: String,
 
-    #[validate(email(message = "email must be a valid email"))]
+    #[validate(length(
+        min = 11, max = 11,
+        message = "O cpf deve ter 11 caracteres"
+    ))]
+    pub cpf: String,
+
+    #[validate(length(
+        min = 9, max = 9,
+        message = "O rg deve ter 9 caracteres"
+    ))]
+    pub rg: String,
+
+    #[validate(length(
+        min = 1, max = 1,
+        message = "O sexo deve ter 1 caracteres"
+    ))]
+    pub sexo: String,
+
+    #[validate(length(
+        min = 1, max = 1,
+        message = "O estado civil deve ter 1 caracteres"
+    ))]
+    pub estado_civil: String,
+
+    #[validate(length(
+        min = 10, max = 10,
+        message = "O telefone deve ter 10 caracteres"
+    ))]
+    pub telefone: String,
+
+    pub data_nascimento: NaiveDateTime,
+
+    #[validate(email(message = "O email deve ser valido"))]
     pub email: String,
 
     #[validate(length(
         min = 6,
-        message = "password is required and must be at least 6 characters"
+        message = "A senha deve deve ter pelo menos 6 caracteres"
     ))]
     pub password: String,
 }
@@ -48,17 +87,49 @@ pub struct CreateUserRequest {
 pub struct UpdateUserRequest {
     #[validate(length(
         min = 3,
-        message = "first_name is required and must be at least 3 characters"
+        message = "O primeiro nome deve ter pelo menos 3 caracteres"
     ))]
-    pub first_name: String,
+    pub nome: String,
 
     #[validate(length(
         min = 3,
-        message = "last_name is required and must be at least 3 characters"
+        message = "O sobrenome deve ter pelo menos 3 caracteres"
     ))]
-    pub last_name: String,
+    pub sobrenome: String,
 
-    #[validate(email(message = "email must be a valid email"))]
+    #[validate(length(
+        min = 11, max = 11,
+        message = "O cpf deve ter 11 caracteres"
+    ))]
+    pub cpf: String,
+
+    #[validate(length(
+        min = 9, max = 9,
+        message = "O rg deve ter 9 caracteres"
+    ))]
+    pub rg: String,
+
+    #[validate(length(
+        min = 1, max = 1,
+        message = "O sexo deve ter 1 caracteres"
+    ))]
+    pub sexo: String,
+
+    #[validate(length(
+        min = 1, max = 1,
+        message = "O estado civil deve ter 1 caracteres"
+    ))]
+    pub estado_civil: String,
+
+    #[validate(length(
+        min = 10, max = 10,
+        message = "O telefone deve ter 10 caracteres"
+    ))]
+    pub telefone: String,
+
+    pub data_nascimento: NaiveDateTime,
+
+    #[validate(email(message = "O email deve ser valido"))]
     pub email: String,
 }
 
@@ -89,8 +160,14 @@ pub async fn create_user(
     let user_id = Uuid::new_v4();
     let new_user: User = NewUser {
         id: user_id.to_string(),
-        first_name: params.first_name.to_string(),
-        last_name: params.last_name.to_string(),
+        nome: params.nome.to_string(),
+        sobrenome: params.sobrenome.to_string(),
+        cpf: params.cpf.to_string(),
+        rg: params.rg.to_string(),
+        data_nascimento: params.data_nascimento,
+        sexo: params.sexo.to_string(),
+        estado_civil: params.estado_civil.to_string(),
+        telefone: params.telefone.to_string(),
         email: params.email.to_string(),
         password: params.password.to_string(),
         created_by: user_id.to_string(),
@@ -113,8 +190,14 @@ pub async fn update_user(
     // update when auth is added
     let update_user = UpdateUser {
         id: user_id.to_string(),
-        first_name: params.first_name.to_string(),
-        last_name: params.last_name.to_string(),
+        nome: params.nome.to_string(),
+        sobrenome: params.sobrenome.to_string(),
+        cpf: params.cpf.to_string(),
+        rg: params.rg.to_string(),
+        data_nascimento: params.data_nascimento,
+        sexo: params.sexo.to_string(),
+        estado_civil: params.estado_civil.to_string(),
+        telefone: params.telefone.to_string(),
         email: params.email.to_string(),
         updated_by: user_id.to_string(),
     };
@@ -135,8 +218,14 @@ impl From<User> for UserResponse {
     fn from(user: User) -> Self {
         UserResponse {
             id: Uuid::parse_str(&user.id).unwrap(),
-            first_name: user.first_name.to_string(),
-            last_name: user.last_name.to_string(),
+            nome: user.nome.to_string(),
+            sobrenome: user.sobrenome.to_string(),
+            cpf: user.cpf.to_string(),
+            rg: user.rg.to_string(),
+            data_nascimento: user.data_nascimento,
+            sexo: user.sexo.to_string(),
+            estado_civil: user.estado_civil.to_string(),
+            telefone: user.telefone.to_string(),
             email: user.email.to_string(),
         }
     }
@@ -148,6 +237,9 @@ impl From<Vec<User>> for UsersResponse {
     }
 }
 
+///Testes
+///Testes
+///Testes
 #[cfg(test)]
 pub mod tests {
     use super::*;
@@ -191,15 +283,21 @@ pub mod tests {
     #[actix_rt::test]
     async fn it_creates_a_user() {
         let params = Json(CreateUserRequest {
-            first_name: "Satoshi".into(),
-            last_name: "Nakamoto".into(),
+            nome: "Satoshi".into(),
+            sobrenome: "Nakamoto".into(),
+            cpf: "12345678901".into(),
+            rg: "123456789".into(),
+            data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
+            sexo: "M".into(),
+            estado_civil: "Solteiro".into(),
+            telefone: "123456789".into(),
             email: "satoshi@nakamotoinstitute.org".into(),
             password: "123456".into(),
         });
         let response = create_user(get_data_pool(), Json(params.clone()))
             .await
             .unwrap();
-        assert_eq!(response.into_inner().first_name, params.first_name);
+        assert_eq!(response.into_inner().nome, params.nome);
     }
 
     #[actix_rt::test]
@@ -207,14 +305,20 @@ pub mod tests {
         let first_user = &get_all_users().0[0];
         let user_id: Path<Uuid> = get_first_users_id().into();
         let params = Json(UpdateUserRequest {
-            first_name: first_user.first_name.clone(),
-            last_name: first_user.last_name.clone(),
+            nome: first_user.nome.clone(),
+            sobrenome: first_user.sobrenome.clone(),
+            cpf: first_user.cpf.clone(),
+            rg: first_user.rg.clone(),
+            data_nascimento: first_user.data_nascimento.clone(),
+            sexo: first_user.sexo.clone(),
+            estado_civil: first_user.estado_civil.clone(),
+            telefone: first_user.telefone.clone(),
             email: first_user.email.clone(),
         });
         let response = update_user(user_id, get_data_pool(), Json(params.clone()))
             .await
             .unwrap();
-        assert_eq!(response.into_inner().first_name, params.first_name);
+        assert_eq!(response.into_inner().nome, params.nome);
     }
 
     #[actix_rt::test]

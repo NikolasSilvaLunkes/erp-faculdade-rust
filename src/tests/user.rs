@@ -2,6 +2,7 @@
 mod tests {
     use crate::handlers::user::{tests::get_first_users_id, CreateUserRequest};
     use crate::tests::helpers::tests::{assert_get, assert_post};
+    use chrono::{NaiveDate};
     use actix_web::web::Path;
     use uuid::Uuid;
 
@@ -22,8 +23,14 @@ mod tests {
     #[actix_rt::test]
     async fn it_creates_a_user() {
         let params = CreateUserRequest {
-            first_name: "Satoshi".into(),
-            last_name: "Nakamoto".into(),
+            nome: "Satoshi".into(),
+            sobrenome: "Nakamoto".into(),
+            cpf: "12345678901".into(),
+            rg: "123456789".into(),
+            data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
+            sexo: "M".into(),
+            estado_civil: "Solteiro".into(),
+            telefone: "123456789".into(),
             email: "satoshi@nakamotoinstitute.org".into(),
             password: "123456".into(),
         };

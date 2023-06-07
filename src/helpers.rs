@@ -21,13 +21,13 @@ mod tests {
 
     #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
     pub struct TestResponse {
-        pub first_name: String,
+        pub nome: String,
     }
 
     #[test]
     fn it_responds_json() {
         let response = TestResponse {
-            first_name: "Satoshi".into(),
+            nome: "Satoshi".into(),
         };
         let result = respond_json(response.clone());
         assert!(result.is_ok());

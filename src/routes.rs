@@ -17,14 +17,15 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         // /api/v1 routes
         .service(
             web::scope("/api/v1")
+            .service(
+                web::scope("/auth")
+                    .route("/login", web::post().to(login))
+                    .route("/logout", web::get().to(logout)),
+               )       
                 // Lock down routes with AUTH Middleware
                 .wrap(AuthMiddleware)
                 // AUTH routes
-                .service(
-                    web::scope("/auth")
-                        .route("/login", web::post().to(login))
-                        .route("/logout", web::get().to(logout)),
-                )
+                
                 // USER routes
                 .service(
                     web::scope("/user")
