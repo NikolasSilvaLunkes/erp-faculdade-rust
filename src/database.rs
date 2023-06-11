@@ -39,7 +39,7 @@ impl InferPool {
 
 pub fn init_pool<T>(config: Config) -> Result<Pool<T>, PoolError>
 where
-    T: Connection + 'static,
+    T: Connection + 'static  + diesel::r2d2::R2D2Connection,
 {
     let manager = ConnectionManager::<T>::new(config.database_url);
     Pool::builder().build(manager)

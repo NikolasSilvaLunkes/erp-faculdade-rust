@@ -3,7 +3,7 @@ use crate::database::PoolType;
 use crate::errors::ApiError;
 use crate::handlers::user::{UserResponse, UsersResponse};
 use crate::schema::users;
-use chrono::{NaiveDateTime, NaiveDate, Utc};
+use chrono::{NaiveDateTime, NaiveDate, NaiveTime, Utc};
 use diesel::prelude::*;
 use uuid::Uuid;
 
@@ -12,12 +12,12 @@ pub struct User {
     pub id: String,
     pub nome: String,
     pub sobrenome: String,
-    pub cpf: String,
-    pub rg: String,
-    pub data_nascimento: NaiveDateTime,
-    pub sexo: String,
-    pub estado_civil: String,
-    pub telefone: String,
+    pub cpf: Option<String>,
+    pub rg: Option<String>,
+    pub data_nascimento: Option<NaiveDateTime>,
+    pub sexo: Option<String>,
+    pub estado_civil: Option<String>,
+    pub telefone: Option<String>,
     pub email: String,
     pub password: String,
     pub created_by: String,
@@ -31,12 +31,12 @@ pub struct NewUser {
     pub id: String,
     pub nome: String,
     pub sobrenome: String,
-    pub cpf: String,
-    pub rg: String,
-    pub data_nascimento: NaiveDateTime,
-    pub sexo: String,
-    pub estado_civil: String,
-    pub telefone: String,
+    pub cpf: Option<String>,
+    pub rg: Option<String>,
+    pub data_nascimento: Option<NaiveDateTime>,
+    pub sexo: Option<String>,
+    pub estado_civil: Option<String>,
+    pub telefone: Option<String>,
     pub email: String,
     pub password: String,
     pub created_by: String,
@@ -49,12 +49,12 @@ pub struct UpdateUser {
     pub id: String,
     pub nome: String,
     pub sobrenome: String,
-    pub cpf: String,
-    pub rg: String,
-    pub data_nascimento: NaiveDateTime,
-    pub sexo: String,
-    pub estado_civil: String,
-    pub telefone: String,
+    pub cpf: Option<String>,
+    pub rg: Option<String>,
+    pub data_nascimento: Option<NaiveDateTime>,
+    pub sexo: Option<String>,
+    pub estado_civil: Option<String>,
+    pub telefone: Option<String>,
     pub email: String,
     pub updated_by: String,
 }
@@ -69,8 +69,8 @@ pub struct AuthUser {
 pub fn get_all(pool: &PoolType) -> Result<UsersResponse, ApiError> {
     use crate::schema::users::dsl::users;
 
-    let conn = pool.get()?;
-    let all_users = users.load(&conn)?;
+    let mut conn = pool.get()?;
+    let all_users = users.load(&mut conn)?;
 
     Ok(all_users.into())
 }
@@ -80,10 +80,10 @@ pub fn find(pool: &PoolType, user_id: Uuid) -> Result<UserResponse, ApiError> {
     use crate::schema::users::dsl::{id, users};
 
     let not_found = format!("User {} not found", user_id);
-    let conn = pool.get()?;
+    let mut conn = pool.get()?;
     let user = users
         .filter(id.eq(user_id.to_string()))
-        .first::<User>(&conn)
+        .first::<User>(&mut conn)
         .map_err(|_| ApiError::NotFound(not_found))?;
 
     Ok(user.into())
@@ -98,11 +98,11 @@ pub fn find_by_auth(
 ) -> Result<UserResponse, ApiError> {
     use crate::schema::users::dsl::{email, password, users};
 
-    let conn = pool.get()?;
+    let mut conn = pool.get()?;
     let user = users
         .filter(email.eq(user_email.to_string()))
         .filter(password.eq(user_password.to_string()))
-        .first::<User>(&conn)
+        .first::<User>(&mut conn)
         .map_err(|_| ApiError::Unauthorized("Invalid login".into()))?;
     Ok(user.into())
 }
@@ -111,8 +111,8 @@ pub fn find_by_auth(
 pub fn create(pool: &PoolType, new_user: &User) -> Result<UserResponse, ApiError> {
     use crate::schema::users::dsl::users;
 
-    let conn = pool.get()?;
-    diesel::insert_into(users).values(new_user).execute(&conn)?;
+    let mut conn = pool.get()?;
+    diesel::insert_into(users).values(new_user).execute(&mut conn)?;
     Ok(new_user.clone().into())
 }
 
@@ -120,11 +120,11 @@ pub fn create(pool: &PoolType, new_user: &User) -> Result<UserResponse, ApiError
 pub fn update(pool: &PoolType, update_user: &UpdateUser) -> Result<UserResponse, ApiError> {
     use crate::schema::users::dsl::{id, users};
 
-    let conn = pool.get()?;
+    let mut conn = pool.get()?;
     diesel::update(users)
         .filter(id.eq(update_user.id.clone()))
         .set(update_user)
-        .execute(&conn)?;
+        .execute(&mut conn)?;
     find(&pool, Uuid::parse_str(&update_user.id)?)
 }
 
@@ -132,10 +132,10 @@ pub fn update(pool: &PoolType, update_user: &UpdateUser) -> Result<UserResponse,
 pub fn delete(pool: &PoolType, user_id: Uuid) -> Result<(), ApiError> {
     use crate::schema::users::dsl::{id, users};
 
-    let conn = pool.get()?;
+    let mut conn = pool.get()?;
     diesel::delete(users)
         .filter(id.eq(user_id.to_string()))
-        .execute(&conn)?;
+        .execute(&mut conn)?;
     Ok(())
 }
 
@@ -177,12 +177,12 @@ pub mod tests {
             id: user_id.to_string(),
             nome: "Model".to_string(),
             sobrenome: "Test".to_string(),
-            cpf: "12345678901".to_string(),
-            rg: "123456789".to_string(),
-            data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
-            sexo: "M".to_string(),
-            estado_civil: "Solteiro".to_string(),
-            telefone: "12345678901".to_string(),
+            cpf: Some("12345678901".to_string()),
+            rg: Some("123456789".to_string()),
+            data_nascimento: Some(NaiveDateTime::new(NaiveDate::from_ymd(1990, 1, 1),NaiveTime::from_hms_milli(0, 0, 0, 0))),
+            sexo: Some("M".to_string()),
+            estado_civil: Some("Solteiro".to_string()),
+            telefone: Some("12345678901".to_string()),
             email: "model-test@nothing.org".to_string(),
             password: "123456".to_string(),
             created_by: user_id.to_string(),
@@ -230,12 +230,12 @@ pub mod tests {
             id: user.id.to_string(),
             nome: "ModelUpdate".to_string(),
             sobrenome: "TestUpdate".to_string(),
-            cpf: "12345678901".to_string(),
-            rg: "123456789".to_string(),
-            data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
-            sexo: "M".to_string(),
-            estado_civil: "Solteiro".to_string(),
-            telefone: "12345678901".to_string(),
+            cpf: Some("12345678901".to_string()),
+            rg: Some("123456789".to_string()),
+            data_nascimento: Some(NaiveDateTime::new(NaiveDate::from_ymd(1990, 1, 1),NaiveTime::from_hms_milli(0, 0, 0, 0))),
+            sexo: Some("M".to_string()),
+            estado_civil: Some("Solteiro".to_string()),
+            telefone: Some("12345678901".to_string()),
             email: "model-update-test@nothing.org".to_string(),
             updated_by: user.id.to_string(),
         };
@@ -252,12 +252,12 @@ pub mod tests {
             id: user_id.to_string(),
             nome: "ModelUpdateFailure".to_string(),
             sobrenome: "TestUpdateFailure".to_string(),
-            cpf: "12345678901".to_string(),
-            rg: "123456789".to_string(),
-            data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
-            sexo: "M".to_string(),
-            estado_civil: "Solteiro".to_string(),
-            telefone: "12345678901".to_string(),
+            cpf: Some("12345678901".to_string()),
+            rg: Some("123456789".to_string()),
+            data_nascimento: Some(NaiveDateTime::new(NaiveDate::from_ymd(1990, 1, 1),NaiveTime::from_hms_milli(0, 0, 0, 0))),
+            sexo: Some("M".to_string()),
+            estado_civil: Some("Solteiro".to_string()),
+            telefone: Some("12345678901".to_string()),
             email: "model-update-failure-test@nothing.org".to_string(),
             updated_by: user_id.to_string(),
         };

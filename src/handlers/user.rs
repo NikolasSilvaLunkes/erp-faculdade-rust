@@ -8,7 +8,7 @@ use rayon::prelude::*;
 use serde::Serialize;
 use uuid::Uuid;
 use validator::Validate;
-use chrono::{NaiveDateTime, NaiveDate};
+use chrono::{NaiveDateTime, NaiveDate, NaiveTime};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct UserResponse {
@@ -162,12 +162,12 @@ pub async fn create_user(
         id: user_id.to_string(),
         nome: params.nome.to_string(),
         sobrenome: params.sobrenome.to_string(),
-        cpf: params.cpf.to_string(),
-        rg: params.rg.to_string(),
-        data_nascimento: params.data_nascimento,
-        sexo: params.sexo.to_string(),
-        estado_civil: params.estado_civil.to_string(),
-        telefone: params.telefone.to_string(),
+        cpf: Some(params.cpf.to_string()),
+        rg: Some(params.rg.to_string()),
+        data_nascimento: Some(params.data_nascimento),
+        sexo: Some(params.sexo.to_string()),
+        estado_civil: Some(params.estado_civil.to_string()),
+        telefone: Some(params.telefone.to_string()),
         email: params.email.to_string(),
         password: params.password.to_string(),
         created_by: user_id.to_string(),
@@ -192,12 +192,12 @@ pub async fn update_user(
         id: user_id.to_string(),
         nome: params.nome.to_string(),
         sobrenome: params.sobrenome.to_string(),
-        cpf: params.cpf.to_string(),
-        rg: params.rg.to_string(),
-        data_nascimento: params.data_nascimento,
-        sexo: params.sexo.to_string(),
-        estado_civil: params.estado_civil.to_string(),
-        telefone: params.telefone.to_string(),
+        cpf: Some(params.cpf.to_string()),
+        rg: Some(params.rg.to_string()),
+        data_nascimento: Some(params.data_nascimento),
+        sexo: Some(params.sexo.to_string()),
+        estado_civil: Some(params.estado_civil.to_string()),
+        telefone: Some(params.telefone.to_string()),
         email: params.email.to_string(),
         updated_by: user_id.to_string(),
     };
@@ -220,12 +220,12 @@ impl From<User> for UserResponse {
             id: Uuid::parse_str(&user.id).unwrap(),
             nome: user.nome.to_string(),
             sobrenome: user.sobrenome.to_string(),
-            cpf: user.cpf.to_string(),
-            rg: user.rg.to_string(),
-            data_nascimento: user.data_nascimento,
-            sexo: user.sexo.to_string(),
-            estado_civil: user.estado_civil.to_string(),
-            telefone: user.telefone.to_string(),
+            cpf: user.cpf.unwrap().to_string(),
+            rg: user.rg.unwrap().to_string(),
+            data_nascimento: user.data_nascimento.unwrap(),
+            sexo: user.sexo.unwrap().to_string(),
+            estado_civil: user.estado_civil.unwrap().to_string(),
+            telefone: user.telefone.unwrap().to_string(),
             email: user.email.to_string(),
         }
     }
