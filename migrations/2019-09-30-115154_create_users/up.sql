@@ -10,7 +10,7 @@ CREATE TABLE users (
   sexo CHAR(1),
   estado_civil VARCHAR(20),
   telefone VARCHAR(22),
-  email VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
   password VARCHAR(122) NOT NULL,
   created_by VARCHAR(36) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
