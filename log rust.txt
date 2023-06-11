@@ -1,3 +1,5 @@
+https://www.youtube.com/watch?v=dLxCpd3IGys
+
 PS C:\Users\nikol\Documents\faculdade\rust-actix-example> cargo run
 warning: #[table_name] attribute form is deprecated
   = help: use `#[diesel(table_name = users)]` instead
