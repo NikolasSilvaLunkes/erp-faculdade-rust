@@ -1,4 +1,4 @@
-ALTER DATABASE erp_rust SET datestyle TO "ISO, DMY";
+--ALTER DATABASE erp_rust SET datestyle TO "ISO, DMY";
 
 CREATE TABLE users (
   id VARCHAR(36) NOT NULL PRIMARY KEY,

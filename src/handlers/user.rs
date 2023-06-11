@@ -41,34 +41,19 @@ pub struct CreateUserRequest {
     ))]
     pub sobrenome: String,
 
-    #[validate(length(
-        min = 11, max = 11,
-        message = "O cpf deve ter 11 caracteres"
-    ))]
+    
     pub cpf: String,
 
-    #[validate(length(
-        min = 9, max = 9,
-        message = "O rg deve ter 9 caracteres"
-    ))]
+    
     pub rg: String,
 
-    #[validate(length(
-        min = 1, max = 1,
-        message = "O sexo deve ter 1 caracteres"
-    ))]
+    
     pub sexo: String,
 
-    #[validate(length(
-        min = 1, max = 1,
-        message = "O estado civil deve ter 1 caracteres"
-    ))]
+    
     pub estado_civil: String,
 
-    #[validate(length(
-        min = 10, max = 10,
-        message = "O telefone deve ter 10 caracteres"
-    ))]
+    
     pub telefone: String,
 
     pub data_nascimento: NaiveDateTime,
@@ -97,34 +82,19 @@ pub struct UpdateUserRequest {
     ))]
     pub sobrenome: String,
 
-    #[validate(length(
-        min = 11, max = 11,
-        message = "O cpf deve ter 11 caracteres"
-    ))]
+    
     pub cpf: String,
 
-    #[validate(length(
-        min = 9, max = 9,
-        message = "O rg deve ter 9 caracteres"
-    ))]
+    
     pub rg: String,
 
-    #[validate(length(
-        min = 1, max = 1,
-        message = "O sexo deve ter 1 caracteres"
-    ))]
+    
     pub sexo: String,
 
-    #[validate(length(
-        min = 1, max = 1,
-        message = "O estado civil deve ter 1 caracteres"
-    ))]
+    
     pub estado_civil: String,
 
-    #[validate(length(
-        min = 10, max = 10,
-        message = "O telefone deve ter 10 caracteres"
-    ))]
+    
     pub telefone: String,
 
     pub data_nascimento: NaiveDateTime,
