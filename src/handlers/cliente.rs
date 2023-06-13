@@ -18,6 +18,7 @@ pub struct ClienteResponse {
     pub nome_social: String,
     pub cpf: String,
     pub rg: String,
+    pub passaporte: Option<String>,
     pub data_nascimento: NaiveDateTime,
     pub sexo: String,
     pub estado_civil: String,
@@ -51,6 +52,7 @@ pub struct CreateClienteRequest {
     
     pub rg: String,
 
+    pub passaporte: Option<String>,
     
     pub sexo: String,
 
@@ -94,6 +96,9 @@ pub struct UpdateClienteRequest {
 
     
     pub rg: String,
+
+
+    pub passaporte: Option<String>,
 
     
     pub sexo: String,
@@ -142,6 +147,7 @@ pub async fn create_cliente(
         nome_social: Some(params.nome_social.to_string()),
         cpf: Some(params.cpf.to_string()),
         rg: Some(params.rg.to_string()),
+        passaporte: params.passaporte.clone(),
         data_nascimento: Some(params.data_nascimento),
         sexo: Some(params.sexo.to_string()),
         estado_civil: Some(params.estado_civil.to_string()),
@@ -173,6 +179,7 @@ pub async fn update_cliente(
         nome_social: Some(params.nome_social.to_string()),
         cpf: Some(params.cpf.to_string()),
         rg: Some(params.rg.to_string()),
+        passaporte: params.passaporte.clone(),
         data_nascimento: Some(params.data_nascimento),
         sexo: Some(params.sexo.to_string()),
         estado_civil: Some(params.estado_civil.to_string()),
@@ -202,6 +209,7 @@ impl From<Cliente> for ClienteResponse {
             nome_social: cliente.nome_social.unwrap().to_string(),
             cpf: cliente.cpf.unwrap().to_string(),
             rg: cliente.rg.unwrap().to_string(),
+            passaporte: cliente.passaporte,
             data_nascimento: cliente.data_nascimento.unwrap(),
             sexo: cliente.sexo.unwrap().to_string(),
             estado_civil: cliente.estado_civil.unwrap().to_string(),
@@ -268,11 +276,12 @@ pub mod tests {
             nome_social: "Satoshi Nakamoto".into(),
             cpf: "12345678901".into(),
             rg: "123456789".into(),
+            passaporte: Some("123456789".into()),
             data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
             sexo: "M".into(),
             estado_civil: "Solteiro".into(),
             telefone: "123456789".into(),
-            email: "satoshi@nakamotoinstitute.org".into(),
+            email: "yoshi@nakamotoinstitute.org".into(),
             password: "123456".into(),
         });
         let response = create_cliente(get_data_pool(), Json(params.clone()))
@@ -291,6 +300,7 @@ pub mod tests {
             nome_social: first_cliente.nome_social.clone(),
             cpf: first_cliente.cpf.clone(),
             rg: first_cliente.rg.clone(),
+            passaporte: first_cliente.passaporte.clone(),
             data_nascimento: first_cliente.data_nascimento.clone(),
             sexo: first_cliente.sexo.clone(),
             estado_civil: first_cliente.estado_civil.clone(),

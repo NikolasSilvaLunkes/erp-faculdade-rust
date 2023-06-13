@@ -261,7 +261,7 @@ pub mod tests {
             sexo: "M".into(),
             estado_civil: "Solteiro".into(),
             telefone: "123456789".into(),
-            email: "satoshi@nakamotoinstitute.org".into(),
+            email: "yoshi@nakamotoinstitute.org".into(),
             password: "123456".into(),
         });
         let response = create_user(get_data_pool(), Json(params.clone()))
