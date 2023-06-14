@@ -267,7 +267,10 @@ pub mod tests {
         let response = create_user(get_data_pool(), Json(params.clone()))
             .await
             .unwrap();
-        assert_eq!(response.into_inner().nome, params.nome);
+        let inner = response.into_inner();
+        assert_eq!(inner.nome, params.nome);
+        let user_id_path: Path<Uuid> = inner.id.into();
+        delete_user(user_id_path, get_data_pool()).await.unwrap();
     }
 
     #[actix_rt::test]

@@ -1,1 +1,1 @@
-DROP TABLE clientes
+--DROP TABLE clientes

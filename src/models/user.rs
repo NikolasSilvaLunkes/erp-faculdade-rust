@@ -99,10 +99,26 @@ pub fn find_by_auth(
     use crate::schema::users::dsl::{email, password, users};
 
     let mut conn = pool.get()?;
+    let result = users
+    .filter(email.eq(user_email.to_string()))
+    .filter(password.eq(user_password.to_string()))
+    .get_result::<User>(&mut conn);
+
+match result {
+    Ok(user) => {
+        // User retrieved successfully
+        // Rest of your code
+    }
+    Err(err) => {
+        // Print the detailed error log
+        eprintln!("Email: {:?} password: {:?}", user_email,user_password);
+        eprintln!("Database error: {:?}", err);
+        // Panic or handle the error as per your requirements
+    }
+}
     let user = users
         .filter(email.eq(user_email.to_string()))
-        .filter(password.eq(user_password.to_string()))
-        .first::<User>(&mut conn)
+        .filter(password.eq(user_password.to_string())).first::<User>(&mut conn)
         .map_err(|_| ApiError::Unauthorized("Invalid login".into()))?;
     Ok(user.into())
 }
@@ -110,7 +126,6 @@ pub fn find_by_auth(
 /// Create a new user
 pub fn create(pool: &PoolType, new_user: &User) -> Result<UserResponse, ApiError> {
     use crate::schema::users::dsl::users;
-
     let mut conn = pool.get()?;
     diesel::insert_into(users).values(new_user).execute(&mut conn)?;
     Ok(new_user.clone().into())
@@ -164,12 +179,14 @@ impl From<NewUser> for User {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use crate::tests::helpers::tests::get_pool;
+    use crate::{tests::helpers::tests::get_pool, handlers::user::delete_user};
 
     pub fn get_all_users() -> Result<UsersResponse, ApiError> {
         let pool = get_pool();
         get_all(&pool)
     }
+
+    
 
     pub fn create_user() -> Result<UserResponse, ApiError> {
         let user_id = Uuid::new_v4();
@@ -183,7 +200,7 @@ pub mod tests {
             sexo: Some("M".to_string()),
             estado_civil: Some("Solteiro".to_string()),
             telefone: Some("12345678901".to_string()),
-            email: "model-test@nothing.org".to_string(),
+            email: "model-test@nothings.org".to_string(),
             password: "123456".to_string(),
             created_by: user_id.to_string(),
             updated_by: user_id.to_string(),
@@ -220,6 +237,7 @@ pub mod tests {
         let unwrapped = created.unwrap();
         let found_user = find(&get_pool(), unwrapped.id.clone()).unwrap();
         assert_eq!(unwrapped, found_user);
+        delete(&get_pool(), unwrapped.id.clone().into()).unwrap();
     }
 
     #[test]

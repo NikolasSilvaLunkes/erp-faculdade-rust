@@ -8,7 +8,7 @@ mod tests {
     #[actix_rt::test]
     async fn it_logs_a_user_in() {
         let params = LoginRequest {
-            email: "satoshi@nakamotoinstitute.org".into(),
+            email: "admin@admin.com".into(),
             password: "123456".into(),
         };
         let url = format!("{}/login", PATH);
