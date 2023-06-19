@@ -15,7 +15,7 @@ pub mod tests {
     /// Helper for HTTP GET integration tests
     pub async fn test_get(route: &str) -> ServiceResponse {
         let login_request = LoginRequest {
-            email: "satoshi@nakamotoinstitute.org".into(),
+            email: "test@user.com".into(),
             password: "123456".into(),
         };
 
@@ -73,10 +73,59 @@ pub mod tests {
         .await
     }
 
+    /// Helper for HTTP PUT integration tests
+    pub async fn test_put<T: Serialize>(route: &str, params: T) -> ServiceResponse {
+        let mut app = test::init_service(
+            App::new()
+                .configure(add_cache)
+                .app_data(app_state())
+                .wrap(get_identity_service())
+                .configure(add_pool)
+                .configure(routes),
+        )
+        .await;
+        let login = login().await;
+        let cookie = login.response().cookies().next().unwrap().to_owned();
+        test::call_service(
+            &mut app,
+            test::TestRequest::put()
+                .set_json(&params)
+                .cookie(cookie.clone())
+                .uri(route)
+                .to_request(),
+        )
+        .await
+    }
+
+    /// Helper for HTTP DELETE integration tests
+    pub async fn test_delete<T: Serialize>(route: &str, params: T) -> ServiceResponse {
+        let mut app = test::init_service(
+            App::new()
+                .configure(add_cache)
+                .app_data(app_state())
+                .wrap(get_identity_service())
+                .configure(add_pool)
+                .configure(routes),
+        )
+        .await;
+        let login = login().await;
+        let cookie = login.response().cookies().next().unwrap().to_owned();
+        test::call_service(
+            &mut app,
+            test::TestRequest::delete()
+                .set_json(&params)
+                .cookie(cookie.clone())
+                .uri(route)
+                .to_request(),
+        )
+        .await
+    }
+
+
     /// Helper to login for tests
     // pub fn login_request() -> Request {
     //     let login_request = LoginRequest {
-    //         email: "satoshi@nakamotoinstitute.org".into(),
+    //         email: "test@user.com".into(),
     //         password: "123456".into(),
     //     };
     //     test::TestRequest::post()
@@ -112,7 +161,7 @@ pub mod tests {
     /// Login to routes  
     pub async fn login() -> ServiceResponse {
         let login_request = LoginRequest {
-            email: "satoshi@nakamotoinstitute.org".into(),
+            email: "test@user.com".into(),
             password: "123456".into(),
         };
         let mut app = test::init_service(

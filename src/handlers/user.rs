@@ -60,14 +60,14 @@ pub struct CreateUserRequest {
     pub sexo: String,
 
     #[validate(length(
-        min = 1, max = 1,
-        message = "O estado civil deve ter 1 caracteres"
+        min = 1,
+        message = "O estado civil deve ter ao menos um caracter"
     ))]
     pub estado_civil: String,
 
     #[validate(length(
-        min = 10, max = 10,
-        message = "O telefone deve ter 10 caracteres"
+        min = 9, max = 11,
+        message = "O telefone deve ter de 9 a 11 caracteres"
     ))]
     pub telefone: String,
 
@@ -116,14 +116,14 @@ pub struct UpdateUserRequest {
     pub sexo: String,
 
     #[validate(length(
-        min = 1, max = 1,
-        message = "O estado civil deve ter 1 caracteres"
+        min = 1,
+        message = "O estado civil deve ter no minimo 1 caracter"
     ))]
     pub estado_civil: String,
 
     #[validate(length(
-        min = 10, max = 10,
-        message = "O telefone deve ter 10 caracteres"
+        min = 9, max = 11,
+        message = "O telefone deve ter de 9 a 11 caracteres"
     ))]
     pub telefone: String,
 
@@ -244,6 +244,8 @@ impl From<Vec<User>> for UsersResponse {
 pub mod tests {
     use super::*;
     use crate::models::user::tests::create_user as model_create_user;
+    use crate::models::user::tests::create_user_by_email as model_create_user_by_email;
+    use crate::models::user::delete as model_delete;
     use crate::tests::helpers::tests::{get_data_pool, get_pool};
 
     pub fn get_all_users() -> UsersResponse {
@@ -290,20 +292,22 @@ pub mod tests {
             data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
             sexo: "M".into(),
             estado_civil: "Solteiro".into(),
-            telefone: "123456789".into(),
-            email: "satoshi@nakamotoinstitute.org".into(),
+            telefone: "1234567890".into(),
+            email: "teste_handler_create@teste.com".into(),
             password: "123456".into(),
         });
         let response = create_user(get_data_pool(), Json(params.clone()))
             .await
-            .unwrap();
-        assert_eq!(response.into_inner().nome, params.nome);
+            .unwrap()
+            .into_inner();
+        assert_eq!(response.nome, params.nome);
+        delete(&get_data_pool(), response.id);
     }
 
     #[actix_rt::test]
     async fn it_updates_a_user() {
-        let first_user = &get_all_users().0[0];
-        let user_id: Path<Uuid> = get_first_users_id().into();
+        let first_user = model_create_user_by_email("teste_handler_update@teste.com").unwrap();
+        let user_id: Path<Uuid> = Path::from(first_user.id);
         let params = Json(UpdateUserRequest {
             nome: first_user.nome.clone(),
             sobrenome: first_user.sobrenome.clone(),
@@ -319,11 +323,12 @@ pub mod tests {
             .await
             .unwrap();
         assert_eq!(response.into_inner().nome, params.nome);
+        delete(&get_data_pool(), first_user.id);
     }
 
     #[actix_rt::test]
     async fn it_deletes_a_user() {
-        let created = model_create_user();
+        let created = model_create_user_by_email("teste_handler_delete@teste.com");
         let user_id = created.unwrap().id;
         let user_id_path: Path<Uuid> = user_id.into();
         let user = find(&get_pool(), user_id);

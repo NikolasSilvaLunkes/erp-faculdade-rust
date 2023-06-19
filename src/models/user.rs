@@ -183,7 +183,28 @@ pub mod tests {
             sexo: Some("M".to_string()),
             estado_civil: Some("Solteiro".to_string()),
             telefone: Some("12345678901".to_string()),
-            email: "model-test@nothing.org".to_string(),
+            email: "model_test@nothing.org".to_string(),
+            password: "123456".to_string(),
+            created_by: user_id.to_string(),
+            updated_by: user_id.to_string(),
+        };
+        let user: User = new_user.into();
+        create(&get_pool(), &user)
+    }
+
+    pub fn create_user_by_email(email: &str) -> Result<UserResponse, ApiError> {
+        let user_id = Uuid::new_v4();
+        let new_user = NewUser {
+            id: user_id.to_string(),
+            nome: "Model".to_string(),
+            sobrenome: "Test".to_string(),
+            cpf: Some("12345678901".to_string()),
+            rg: Some("123456789".to_string()),
+            data_nascimento: Some(NaiveDateTime::new(NaiveDate::from_ymd(1990, 1, 1),NaiveTime::from_hms_milli(0, 0, 0, 0))),
+            sexo: Some("M".to_string()),
+            estado_civil: Some("Solteiro".to_string()),
+            telefone: Some("12345678901".to_string()),
+            email: email.to_string(),
             password: "123456".to_string(),
             created_by: user_id.to_string(),
             updated_by: user_id.to_string(),
@@ -219,15 +240,16 @@ pub mod tests {
         assert!(created.is_ok());
         let unwrapped = created.unwrap();
         let found_user = find(&get_pool(), unwrapped.id.clone()).unwrap();
+        let user_id = unwrapped.id;
+        delete(&get_pool(), user_id).unwrap();
         assert_eq!(unwrapped, found_user);
     }
 
     #[test]
     fn it_updates_a_user() {
-        let users = get_all_users().unwrap();
-        let user = &users.0[1];
+        let created = create_user_by_email("teste_model_update6@teste.com").unwrap();
         let update_user = UpdateUser {
-            id: user.id.to_string(),
+            id: created.id.to_string(),
             nome: "ModelUpdate".to_string(),
             sobrenome: "TestUpdate".to_string(),
             cpf: Some("12345678901".to_string()),
@@ -236,13 +258,14 @@ pub mod tests {
             sexo: Some("M".to_string()),
             estado_civil: Some("Solteiro".to_string()),
             telefone: Some("12345678901".to_string()),
-            email: "model-update-test@nothing.org".to_string(),
-            updated_by: user.id.to_string(),
+            email: "teste_model_update6@teste.com".to_string(),
+            updated_by: created.id.to_string(),
         };
         let updated = update(&get_pool(), &update_user);
         assert!(updated.is_ok());
-        let found_user = find(&get_pool(), user.id).unwrap();
+        let found_user = find(&get_pool(), created.id).unwrap();
         assert_eq!(updated.unwrap(), found_user);
+        delete(&get_pool(), created.id);
     }
 
     #[test]
@@ -267,7 +290,7 @@ pub mod tests {
 
     #[test]
     fn it_deletes_a_user() {
-        let created = create_user();
+        let created = create_user_by_email("teste_model_delete@teste.com");
         let user_id = created.unwrap().id;
         let user = find(&get_pool(), user_id);
         assert!(user.is_ok());

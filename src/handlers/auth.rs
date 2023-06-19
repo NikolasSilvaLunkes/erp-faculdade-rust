@@ -70,7 +70,7 @@ pub mod tests {
 
     async fn login_user() -> Result<Json<UserResponse>, ApiError> {
         let params = LoginRequest {
-            email: "satoshi@nakamotoinstitute.org".into(),
+            email: "test@user.com".into(),
             password: "123456".into(),
         };
         let identity = get_identity().await;
