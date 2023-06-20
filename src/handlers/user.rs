@@ -15,12 +15,12 @@ pub struct UserResponse {
     pub id: Uuid,
     pub nome: String,
     pub sobrenome: String,
-    pub cpf: String,
-    pub rg: String,
-    pub data_nascimento: NaiveDateTime,
-    pub sexo: String,
-    pub estado_civil: String,
-    pub telefone: String,
+    pub cpf: Option<String>,
+    pub rg: Option<String>,
+    pub data_nascimento: Option<NaiveDateTime>,
+    pub sexo: Option<String>,
+    pub estado_civil: Option<String>,
+    pub telefone: Option<String>,
     pub email: String,
 }
 
@@ -45,33 +45,33 @@ pub struct CreateUserRequest {
         min = 11, max = 11,
         message = "O cpf deve ter 11 caracteres"
     ))]
-    pub cpf: String,
+    pub cpf: Option<String>,
 
     #[validate(length(
         min = 9, max = 9,
         message = "O rg deve ter 9 caracteres"
     ))]
-    pub rg: String,
+    pub rg: Option<String>,
 
     #[validate(length(
         min = 1, max = 1,
         message = "O sexo deve ter 1 caracteres"
     ))]
-    pub sexo: String,
+    pub sexo: Option<String>,
 
     #[validate(length(
         min = 1,
         message = "O estado civil deve ter ao menos um caracter"
     ))]
-    pub estado_civil: String,
+    pub estado_civil: Option<String>,
 
     #[validate(length(
         min = 9, max = 11,
         message = "O telefone deve ter de 9 a 11 caracteres"
     ))]
-    pub telefone: String,
+    pub telefone: Option<String>,
 
-    pub data_nascimento: NaiveDateTime,
+    pub data_nascimento: Option<NaiveDateTime>,
 
     #[validate(email(message = "O email deve ser valido"))]
     pub email: String,
@@ -101,33 +101,33 @@ pub struct UpdateUserRequest {
         min = 11, max = 11,
         message = "O cpf deve ter 11 caracteres"
     ))]
-    pub cpf: String,
+    pub cpf: Option<String>,
 
     #[validate(length(
         min = 9, max = 9,
         message = "O rg deve ter 9 caracteres"
     ))]
-    pub rg: String,
+    pub rg: Option<String>,
 
     #[validate(length(
         min = 1, max = 1,
         message = "O sexo deve ter 1 caracteres"
     ))]
-    pub sexo: String,
+    pub sexo: Option<String>,
 
     #[validate(length(
         min = 1,
         message = "O estado civil deve ter no minimo 1 caracter"
     ))]
-    pub estado_civil: String,
+    pub estado_civil: Option<String>,
 
     #[validate(length(
         min = 9, max = 11,
         message = "O telefone deve ter de 9 a 11 caracteres"
     ))]
-    pub telefone: String,
+    pub telefone: Option<String>,
 
-    pub data_nascimento: NaiveDateTime,
+    pub data_nascimento: Option<NaiveDateTime>,
 
     #[validate(email(message = "O email deve ser valido"))]
     pub email: String,
@@ -162,12 +162,12 @@ pub async fn create_user(
         id: user_id.to_string(),
         nome: params.nome.to_string(),
         sobrenome: params.sobrenome.to_string(),
-        cpf: Some(params.cpf.to_string()),
-        rg: Some(params.rg.to_string()),
-        data_nascimento: Some(params.data_nascimento),
-        sexo: Some(params.sexo.to_string()),
-        estado_civil: Some(params.estado_civil.to_string()),
-        telefone: Some(params.telefone.to_string()),
+        cpf: params.cpf.clone(),
+        rg: params.rg.clone(),
+        data_nascimento: params.data_nascimento.clone(),
+        sexo: params.sexo.clone(),
+        estado_civil: params.estado_civil.clone(),
+        telefone: params.telefone.clone(),
         email: params.email.to_string(),
         password: params.password.to_string(),
         created_by: user_id.to_string(),
@@ -192,12 +192,12 @@ pub async fn update_user(
         id: user_id.to_string(),
         nome: params.nome.to_string(),
         sobrenome: params.sobrenome.to_string(),
-        cpf: Some(params.cpf.to_string()),
-        rg: Some(params.rg.to_string()),
-        data_nascimento: Some(params.data_nascimento),
-        sexo: Some(params.sexo.to_string()),
-        estado_civil: Some(params.estado_civil.to_string()),
-        telefone: Some(params.telefone.to_string()),
+        cpf: params.cpf.clone(),
+        rg: params.rg.clone(),
+        data_nascimento: params.data_nascimento.clone(),
+        sexo: params.sexo.clone(),
+        estado_civil: params.estado_civil.clone(),
+        telefone:params.telefone.clone(),
         email: params.email.to_string(),
         updated_by: user_id.to_string(),
     };
@@ -220,12 +220,12 @@ impl From<User> for UserResponse {
             id: Uuid::parse_str(&user.id).unwrap(),
             nome: user.nome.to_string(),
             sobrenome: user.sobrenome.to_string(),
-            cpf: user.cpf.unwrap().to_string(),
-            rg: user.rg.unwrap().to_string(),
-            data_nascimento: user.data_nascimento.unwrap(),
-            sexo: user.sexo.unwrap().to_string(),
-            estado_civil: user.estado_civil.unwrap().to_string(),
-            telefone: user.telefone.unwrap().to_string(),
+            cpf: user.cpf,
+            rg: user.rg,
+            data_nascimento: user.data_nascimento,
+            sexo: user.sexo,
+            estado_civil: user.estado_civil,
+            telefone: user.telefone,
             email: user.email.to_string(),
         }
     }
@@ -287,12 +287,12 @@ pub mod tests {
         let params = Json(CreateUserRequest {
             nome: "Satoshi".into(),
             sobrenome: "Nakamoto".into(),
-            cpf: "12345678901".into(),
-            rg: "123456789".into(),
-            data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
-            sexo: "M".into(),
-            estado_civil: "Solteiro".into(),
-            telefone: "1234567890".into(),
+            cpf: Some("12345678901".into()),
+            rg: Some("123456789".into()),
+            data_nascimento: Some(NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0)),
+            sexo: Some("M".into()),
+            estado_civil: Some("Solteiro".into()),
+            telefone: Some("1234567890".into()),
             email: "teste_handler_create@teste.com".into(),
             password: "123456".into(),
         });
