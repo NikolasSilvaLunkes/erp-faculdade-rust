@@ -2,6 +2,7 @@
 mod tests {
     use crate::handlers::user::{tests::get_first_users_id, CreateUserRequest};
     use crate::tests::helpers::tests::{assert_get, assert_post};
+    use crate::models::user::delete as model_delete;
     use chrono::{NaiveDate};
     use actix_web::web::Path;
     use uuid::Uuid;
@@ -20,20 +21,21 @@ mod tests {
         assert_get(PATH).await;
     }
 
-//     #[actix_rt::test]
-//     async fn it_creates_a_user() {
-//         let params = CreateUserRequest {
-//             nome: "Satoshi".into(),
-//             sobrenome: "Nakamoto".into(),
-//             cpf: "12345678901".into(),
-//             rg: "123456789".into(),
-//             data_nascimento: NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0),
-//             sexo: "M".into(),
-//             estado_civil: "Solteiro".into(),
-//             telefone: "123456789".into(),
-//             email: "test@user.com".into(),
-//             password: "123456".into(),
-//         };
-//         assert_post(PATH, params).await;
-//     }
+    // #[actix_rt::test]
+    // async fn it_creates_a_user() {
+    //     let params = CreateUserRequest {
+    //         nome: "Satoshisan".into(),
+    //         sobrenome: "Nakamoto".into(),
+    //         cpf: Some("12345678901".into()),
+    //         rg: Some("123456789".into()),
+    //         data_nascimento: Some(NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0)),
+    //         sexo: Some("M".into()),
+    //         estado_civil: Some("Solteiro".into()),
+    //         telefone: Some("123456789".into()),
+    //         email: "testingg@user.com".into(),
+    //         password: "123456".into(),
+    //     };
+    //     let response = assert_post(PATH, params).await;
+        
+    // }
 }
