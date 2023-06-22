@@ -19,7 +19,7 @@ pub struct ProdutoResponse {
     pub unidade_medida: Option<String>,
     pub preco_venda: Option<f64>,
     pub preco_minimo: Option<f64>,
-    pub preco_medio: Option<f64>,
+    pub custo_medio: Option<f64>,
     pub pis: Option<String>,
     pub cofins: Option<String>,
     pub ncm: Option<String>,
@@ -42,7 +42,7 @@ pub struct CreateProdutoRequest {
     pub unidade_medida: Option<String>,
     pub preco_venda: Option<f64>,
     pub preco_minimo: Option<f64>,
-    pub preco_medio: Option<f64>,
+    pub custo_medio: Option<f64>,
     pub pis: Option<String>,
     pub cofins: Option<String>,
     pub ncm: Option<String>,
@@ -62,7 +62,7 @@ pub struct UpdateProdutoRequest {
     pub unidade_medida: Option<String>,
     pub preco_venda: Option<f64>,
     pub preco_minimo: Option<f64>,
-    pub preco_medio: Option<f64>,
+    pub custo_medio: Option<f64>,
     pub pis: Option<String>,
     pub cofins: Option<String>,
     pub ncm: Option<String>,
@@ -104,7 +104,7 @@ pub async fn create_produto(
         unidade_medida: produto.unidade_medida,
         preco_venda: produto.preco_venda,
         preco_minimo: produto.preco_minimo,
-        preco_medio: produto.preco_medio,
+        custo_medio: produto.custo_medio,
         pis: produto.pis,
         cofins: produto.cofins,
         ncm: produto.ncm,
@@ -121,7 +121,7 @@ pub async fn create_produto(
 
 /// Update a produto
 pub async fn update_produto(
-    produto_id: Path<Uuid>,
+    produto: Path<Uuid>,
     pool: Data<PoolType>,
     params: Json<UpdateProdutoRequest>,
 ) -> Result<Json<ProdutoResponse>, ApiError> {
@@ -130,16 +130,21 @@ pub async fn update_produto(
     // temporarily use the produto's id for updated_at
     // update when auth is added
     let update_produto = UpdateProduto {
-        id: produto_id.to_string(),
-        nome: params.nome.to_string(),
-        sobrenome: params.sobrenome.to_string(),
-        cpf: params.cpf.clone(),
-        rg: params.rg.clone(),
-        data_nascimento: params.data_nascimento.clone(),
-        sexo: params.sexo.clone(),
-        estado_civil: params.estado_civil.clone(),
-        telefone:params.telefone.clone(),
-        updated_by: produto_id.to_string(),
+        id: produto.to_string(),
+        descricao: params.descricao.to_string(),
+        codigo_de_barras: produto.codigo_de_barras,
+        icms: produto.icms,
+        unidade_medida: produto.unidade_medida,
+        preco_venda: produto.preco_venda,
+        preco_minimo: produto.preco_minimo,
+        custo_medio: produto.custo_medio,
+        pis: produto.pis,
+        cofins: produto.cofins,
+        ncm: produto.ncm,
+        cest: produto.cest,
+        cod_ipi: produto.cod_ipi,
+        porcentagem_ipi: produto.porcentagem_ipi,
+        updated_by: produto.to_string(),
     };
     let produto = block(move || update(&pool, &update_produto)).await?;
     respond_json(produto.into())
@@ -158,14 +163,19 @@ impl From<Produto> for ProdutoResponse {
     fn from(produto: Produto) -> Self {
         ProdutoResponse {
             id: Uuid::parse_str(&produto.id).unwrap(),
-            nome: produto.nome.to_string(),
-            sobrenome: produto.sobrenome.to_string(),
-            cpf: produto.cpf,
-            rg: produto.rg,
-            data_nascimento: produto.data_nascimento,
-            sexo: produto.sexo,
-            estado_civil: produto.estado_civil,
-            telefone: produto.telefone,
+            descricao: produto.descricao.to_string(),
+            codigo_de_barras: produto.codigo_de_barras,
+            icms: produto.icms,
+            unidade_medida: produto.unidade_medida,
+            preco_venda: produto.preco_venda,
+            preco_minimo: produto.preco_minimo,
+            custo_medio: produto.custo_medio,
+            pis: produto.pis,
+            cofins: produto.cofins,
+            ncm: produto.ncm,
+            cest: produto.cest,
+            cod_ipi: produto.cod_ipi,
+            porcentagem_ipi: produto.porcentagem_ipi,
         }
     }
 }
@@ -222,20 +232,26 @@ pub mod tests {
     #[actix_rt::test]
     async fn it_creates_a_produto() {
         let params = Json(CreateProdutoRequest {
-            nome: "Satoshi".into(),
-            sobrenome: "Nakamoto".into(),
-            cpf: Some("12345678901".into()),
-            rg: Some("123456789".into()),
-            data_nascimento: Some(NaiveDate::from_ymd(1990, 1, 1).and_hms(0, 0, 0)),
-            sexo: Some("M".into()),
-            estado_civil: Some("Solteiro".into()),
-            telefone: Some("1234567890".into()),
+            descricao: "pepsi".into(),
+            codigo_de_barras: Some("123456789".into()),
+            icms: Some("13".into()),
+            unidade_medida: Some("un".into()),
+            preco_venda: Some(2.5),
+            preco_minimo: Some(2.0),
+            custo_medio: Some(2.2),
+            pis: Some("1245".into()),
+            cofins: Some("123".into()),
+            ncm: Some("512".into()),
+            cest: Some("4612".into()),
+            cod_ipi: Some("123".into()),
+            porcentagem_ipi: Some(2.0),
+
         });
         let response = create_produto(get_data_pool(), Json(params.clone()))
             .await
             .unwrap()
             .into_inner();
-        assert_eq!(response.nome, params.nome);
+        assert_eq!(response.descricao, params.descricao);
         delete(&get_data_pool(), response.id);
     }
 
@@ -244,14 +260,20 @@ pub mod tests {
         let first_produto = model_create_produto().unwrap();
         let produto_id: Path<Uuid> = Path::from(first_produto.id);
         let params = Json(UpdateProdutoRequest {
-            nome: first_produto.nome.clone(),
-            sobrenome: first_produto.sobrenome.clone(),
-            cpf: first_produto.cpf.clone(),
-            rg: first_produto.rg.clone(),
-            data_nascimento: first_produto.data_nascimento.clone(),
-            sexo: first_produto.sexo.clone(),
-            estado_civil: first_produto.estado_civil.clone(),
-            telefone: first_produto.telefone.clone(),
+            id: Uuid::parse_str(&first_produto.id).unwrap(),
+            descricao: first_produto.descricao.to_string(),
+            codigo_de_barras: first_produto.codigo_de_barras,
+            icms: first_produto.icms,
+            unidade_medida: first_produto.unidade_medida,
+            preco_venda: first_produto.preco_venda,
+            preco_minimo: first_produto.preco_minimo,
+            custo_medio: first_produto.custo_medio,
+            pis: first_produto.pis,
+            cofins: first_produto.cofins,
+            ncm: first_produto.ncm,
+            cest: first_produto.cest,
+            cod_ipi: first_produto.cod_ipi,
+            porcentagem_ipi: first_produto.porcentagem_ipi,
         });
         let response = update_produto(produto_id, get_data_pool(), Json(params.clone()))
             .await
