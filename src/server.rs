@@ -7,7 +7,7 @@ use crate::database::add_pool;
 use crate::routes::routes;
 use crate::state::new_state;
 use actix_cors::Cors;
-use actix_web::{middleware::Logger, App, HttpServer};
+use actix_web::{middleware::Logger, App, HttpServer, http};
 use listenfd::ListenFd;
 
 pub async fn server() -> std::io::Result<()> {
@@ -23,7 +23,10 @@ pub async fn server() -> std::io::Result<()> {
     let mut server = HttpServer::new(move || {
         App::new()
             .configure(add_cache)
-            .wrap(Cors::new().supports_credentials().finish())
+            .wrap(Cors::new().supports_credentials().allowed_origin("http://localhost:3000")
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+              .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+              .allowed_header(http::header::CONTENT_TYPE).finish())
             .wrap(Logger::default())
             .wrap(get_identity_service())
             .configure(add_pool)

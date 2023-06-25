@@ -51,6 +51,12 @@ pub async fn logout(id: Identity) -> Result<HttpResponse, ApiError> {
     respond_ok()
 }
 
+/// Logout a user
+/// Forget their user_id
+pub async fn check_auth(id: Identity) -> Result<HttpResponse, ApiError> {
+    respond_ok()
+}
+
 #[cfg(test)]
 pub mod tests {
     use super::*;
