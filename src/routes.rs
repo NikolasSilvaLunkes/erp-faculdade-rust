@@ -5,6 +5,7 @@ use crate::handlers::{
     auth::{login, logout},
     health::get_health,
     user::{create_user, delete_user, get_user, get_users, update_user},
+    cliente::{create_cliente, delete_cliente, get_cliente, get_clientes, update_cliente},
 };
 use crate::middleware::auth::Auth as AuthMiddleware;
 use actix_files::Files;
@@ -34,7 +35,17 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
                         .route("/{id}", web::delete().to(delete_user))
                         .route("", web::get().to(get_users))
                         .route("", web::post().to(create_user)),
+                )
+                // CLIENTE routes
+                .service(
+                    web::scope("/cliente")
+                        .route("/{id}", web::get().to(get_cliente))
+                        .route("/{id}", web::put().to(update_cliente))
+                        .route("/{id}", web::delete().to(delete_cliente))
+                        .route("", web::get().to(get_clientes))
+                        .route("", web::post().to(create_cliente)),
                 ),
+
         )
         // Serve secure static files from the static-private folder
         .service(

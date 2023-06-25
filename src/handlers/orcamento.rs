@@ -2,7 +2,9 @@ use crate::database::PoolType;
 use crate::errors::ApiError;
 use crate::helpers::{respond_json, respond_ok};
 use crate::models::orcamento::{create, delete, find, NewOrcamento, Orcamento};
-use crate::models::orcamento_produto::{create, delete, find, NewOrcamentoProduto, OrcamentoProduto};
+use crate::models::orcamento_produto::{create as create_orcamento_produto, 
+    delete as delete_orcamento_produto, 
+    find as find_orcamento_produto, NewOrcamentoProduto, OrcamentoProduto};
 use crate::validate::validate;
 use actix_web::web::{block, Data, HttpResponse, Json, Path};
 use rayon::prelude::*;
@@ -10,6 +12,7 @@ use serde::Serialize;
 use uuid::Uuid;
 use validator::Validate;
 use chrono::{NaiveDateTime, NaiveDate, NaiveTime};
+use std::thread;
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct OrcamentoResponse {
@@ -41,16 +44,31 @@ pub async fn create_orcamento(
     params: Json<CreateOrcamentoRequest>,
 ) -> Result<Json<OrcamentoResponse>, ApiError> {
     validate(&params)?;
-
-    // temporarily use the new orcamento's id for created_at/updated_at
-    // update when auth is added
     let orcamento_id = Uuid::new_v4();
     let new_orcamento: Orcamento = NewOrcamento {
         id: orcamento_id.to_string(),
         created_by: orcamento_id.to_string(),
     }
     .into();
+    let new_pool = pool.clone();
     let orcamento = block(move || create(&pool, &new_orcamento)).await?;
+    // temporarily use the new orcamento's id for created_at/updated_at
+    // update when auth is added
+    params.produtos.iter().for_each(|params|{
+        let new_pool = new_pool.clone();
+        let orcamento_produto_id = Uuid::new_v4();
+        let new_orcamento_produto: OrcamentoProduto = NewOrcamentoProduto {
+            id: orcamento_produto_id.to_string(),
+            id_produto: params.id_produto.to_string(),
+            id_orcamento: params.id_orcamento.to_string(),
+            quantidade: params.quantidade,
+            created_by: orcamento_produto_id.to_string(),
+        }
+        .into();
+        create_orcamento_produto(&new_pool, &new_orcamento_produto);
+    });
+
+    
     respond_json(orcamento.into())
 }
 
@@ -109,15 +127,21 @@ pub mod tests {
 
     #[actix_rt::test]
     async fn it_creates_a_orcamento() {
+        let orcamento_produto: OrcamentoProduto = NewOrcamentoProduto{
+            id: Uuid::new_v4().to_string(),
+            id_produto: "00000000-0000-0000-0000-000000000000".into(),
+            id_orcamento: "00000000-0000-0000-0000-000000000000".into(),
+            quantidade: 1,
+            created_by: "00000000-0000-0000-0000-000000000000".into(),
+        }.into();
+        let orcamentos_produtos = vec![orcamento_produto];
         let params = Json(CreateOrcamentoRequest {
-            
+            produtos: orcamentos_produtos,
         });
         let response = create_orcamento(get_data_pool(), Json(params.clone()))
-            .await
-            .unwrap()
-            .into_inner();
-        assert_eq!(response.quantidade, params.quantidade);
-        delete(&get_data_pool(), response.id);
+            .await;
+        assert!(response.is_ok());
+        delete(&get_data_pool(), response.unwrap().id);
     }
 
     #[actix_rt::test]
