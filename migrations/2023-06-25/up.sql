@@ -1,5 +1,5 @@
 
-CREATE TABLE orcamento (
+CREATE TABLE orcamentos (
   id VARCHAR(36) NOT NULL PRIMARY KEY,
   created_by VARCHAR(36) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -7,7 +7,7 @@ CREATE TABLE orcamento (
 
 
 
-insert into orcamento (id,
+insert into orcamentos (id,
 created_by)
 VALUES
 ('00000000-0000-0000-0000-000000000000',

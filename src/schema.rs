@@ -29,9 +29,14 @@ diesel::table! {
 }
 
 diesel::table! {
-    orcamento (id) {
+    orcamento_produtos (id) {
         #[max_length = 36]
         id -> Varchar,
+        #[max_length = 36]
+        id_produto -> Varchar,
+        #[max_length = 36]
+        id_orcamento -> Varchar,
+        quantidade -> Int4,
         #[max_length = 36]
         created_by -> Varchar,
         created_at -> Timestamp,
@@ -39,13 +44,9 @@ diesel::table! {
 }
 
 diesel::table! {
-    orcamento_produto (id) {
+    orcamentos (id) {
         #[max_length = 36]
         id -> Varchar,
-        #[max_length = 36]
-        id_produto -> Varchar,
-        #[max_length = 36]
-        id_orcamento -> Varchar,
         #[max_length = 36]
         created_by -> Varchar,
         created_at -> Timestamp,
@@ -119,10 +120,13 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(orcamento_produtos -> orcamentos (id_orcamento));
+diesel::joinable!(orcamento_produtos -> produtos (id_produto));
+
 diesel::allow_tables_to_appear_in_same_query!(
     clientes,
-    orcamento,
-    orcamento_produto,
+    orcamento_produtos,
+    orcamentos,
     produtos,
     users,
 );

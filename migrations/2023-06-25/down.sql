@@ -1,1 +1,1 @@
-DROP TABLE orcamento
+DROP TABLE orcamentos
