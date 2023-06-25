@@ -9,24 +9,23 @@ use serde::Serialize;
 use uuid::Uuid;
 use validator::Validate;
 use chrono::{NaiveDateTime, NaiveDate, NaiveTime};
-use bigdecimal::BigDecimal;
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct ProdutoResponse {
-    pub id: Uuid,
+    pub id: String,
     pub descricao: String,
     pub codigo_de_barras: Option<String>,
     pub icms: Option<String>,
     pub unidade_medida: Option<String>,
-    pub preco_venda: Option<BigDecimal>,
-    pub preco_minimo: Option<BigDecimal>,
-    pub custo_medio: Option<BigDecimal>,
+    pub preco_venda: Option<f64>,
+    pub preco_minimo: Option<f64>,
+    pub custo_medio: Option<f64>,
     pub pis: Option<String>,
     pub cofins: Option<String>,
     pub ncm: Option<String>,
     pub cest: Option<String>,
     pub cod_ipi: Option<String>,
-    pub porcentagem_ipi: Option<BigDecimal>,
+    pub porcentagem_ipi: Option<f64>,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
@@ -34,38 +33,42 @@ pub struct ProdutosResponse(pub Vec<ProdutoResponse>);
 
 #[derive(Clone, Debug, Deserialize, Serialize, Validate)]
 pub struct CreateProdutoRequest {
-    #[validate(length(min = 1))]
-    descricao: String,
-    codigo_de_barras: Option<String>,
-    icms: Option<String>,
-    unidade_medida: Option<String>,
-    preco_venda: Option<BigDecimal>,
-    preco_minimo: Option<BigDecimal>,
-    custo_medio: Option<BigDecimal>,
-    pis: Option<String>,
-    cofins: Option<String>,
-    ncm: Option<String>,
-    cest: Option<String>,
-    cod_ipi: Option<String>,
-    porcentagem_ipi: Option<BigDecimal>,
+    #[validate(length(
+        min = 6,
+        message = "A descrião deve ter pelo menos 6 caracters"
+    ))]
+    pub codigo_de_barras: Option<String>,
+    pub icms: Option<String>,
+    pub unidade_medida: Option<String>,
+    pub preco_venda: Option<f64>,
+    pub preco_minimo: Option<f64>,
+    pub custo_medio: Option<f64>,
+    pub pis: Option<String>,
+    pub cofins: Option<String>,
+    pub ncm: Option<String>,
+    pub cest: Option<String>,
+    pub cod_ipi: Option<String>,
+    pub porcentagem_ipi: Option<f64>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Validate)]
 pub struct UpdateProdutoRequest {
-    #[validate(length(min = 1))]
-    descricao: String,
-    codigo_de_barras: Option<String>,
-    icms: Option<String>,
-    unidade_medida: Option<String>,
-    preco_venda: Option<BigDecimal>,
-    preco_minimo: Option<BigDecimal>,
-    custo_medio: Option<BigDecimal>,
-    pis: Option<String>,
-    cofins: Option<String>,
-    ncm: Option<String>,
-    cest: Option<String>,
-    cod_ipi: Option<String>,
-    porcentagem_ipi: Option<BigDecimal>,
+    #[validate(length(
+        min = 6,
+        message = "A descrião deve ter pelo menos 6 caracters"
+    ))]
+    pub codigo_de_barras: Option<String>,
+    pub icms: Option<String>,
+    pub unidade_medida: Option<String>,
+    pub preco_venda: Option<f64>,
+    pub preco_minimo: Option<f64>,
+    pub custo_medio: Option<f64>,
+    pub pis: Option<String>,
+    pub cofins: Option<String>,
+    pub ncm: Option<String>,
+    pub cest: Option<String>,
+    pub cod_ipi: Option<String>,
+    pub porcentagem_ipi: Option<f64>,
 }
 
 /// Get a produto
@@ -95,21 +98,21 @@ pub async fn create_produto(
     let produto_id = Uuid::new_v4();
     let new_produto: Produto = NewProduto {
         id: produto_id.to_string(),
-        descricao: params.descricao.clone(),
-        codigo_de_barras: params.codigo_de_barras.clone(),
-        icms: params.icms.clone(),
-        unidade_medida: params.unidade_medida.clone(),
-        preco_venda: params.preco_venda.clone(),
-        preco_minimo: params.preco_minimo.clone(),
-        custo_medio: params.custo_medio.clone(),
-        pis: params.pis.clone(),
-        cofins: params.cofins.clone(),
-        ncm: params.ncm.clone(),
-        cest: params.cest.clone(),
-        cod_ipi: params.cod_ipi.clone(),
-        porcentagem_ipi: params.porcentagem_ipi.clone(),
-        created_by: produto_id.to_string(),
-        updated_by: produto_id.to_string(),
+        descricao: params.descricao.to_string(),
+        codigo_de_barras: produto.codigo_de_barras,
+        icms: produto.icms,
+        unidade_medida: produto.unidade_medida,
+        preco_venda: produto.preco_venda,
+        preco_minimo: produto.preco_minimo,
+        custo_medio: produto.custo_medio,
+        pis: produto.pis,
+        cofins: produto.cofins,
+        ncm: produto.ncm,
+        cest: produto.cest,
+        cod_ipi: produto.cod_ipi,
+        porcentagem_ipi: produto.porcentagem_ipi,
+        created_by: produto.to_string(),
+        updated_by: produto.to_string(),
     }
     .into();
     let produto = block(move || create(&pool, &new_produto)).await?;
@@ -118,7 +121,7 @@ pub async fn create_produto(
 
 /// Update a produto
 pub async fn update_produto(
-    produto_id: Path<Uuid>,
+    produto: Path<Uuid>,
     pool: Data<PoolType>,
     params: Json<UpdateProdutoRequest>,
 ) -> Result<Json<ProdutoResponse>, ApiError> {
@@ -127,21 +130,21 @@ pub async fn update_produto(
     // temporarily use the produto's id for updated_at
     // update when auth is added
     let update_produto = UpdateProduto {
-        id: produto_id.to_string(),
-        descricao: params.descricao.clone(),
-        codigo_de_barras: params.codigo_de_barras.clone(),
-        icms: params.icms.clone(),
-        unidade_medida: params.unidade_medida.clone(),
-        preco_venda: params.preco_venda.clone(),
-        preco_minimo: params.preco_minimo.clone(),
-        custo_medio: params.custo_medio.clone(),
-        pis: params.pis.clone(),
-        cofins: params.cofins.clone(),
-        ncm: params.ncm.clone(),
-        cest: params.cest.clone(),
-        cod_ipi: params.cod_ipi.clone(),
-        porcentagem_ipi: params.porcentagem_ipi.clone(),
-        updated_by: produto_id.to_string(),
+        id: produto.to_string(),
+        descricao: params.descricao.to_string(),
+        codigo_de_barras: produto.codigo_de_barras,
+        icms: produto.icms,
+        unidade_medida: produto.unidade_medida,
+        preco_venda: produto.preco_venda,
+        preco_minimo: produto.preco_minimo,
+        custo_medio: produto.custo_medio,
+        pis: produto.pis,
+        cofins: produto.cofins,
+        ncm: produto.ncm,
+        cest: produto.cest,
+        cod_ipi: produto.cod_ipi,
+        porcentagem_ipi: produto.porcentagem_ipi,
+        updated_by: produto.to_string(),
     };
     let produto = block(move || update(&pool, &update_produto)).await?;
     respond_json(produto.into())
@@ -160,19 +163,19 @@ impl From<Produto> for ProdutoResponse {
     fn from(produto: Produto) -> Self {
         ProdutoResponse {
             id: Uuid::parse_str(&produto.id).unwrap(),
-            descricao: produto.descricao.clone(),
-            codigo_de_barras: produto.codigo_de_barras.clone(),
-            icms: produto.icms.clone(),
-            unidade_medida: produto.unidade_medida.clone(),
-            preco_venda: produto.preco_venda.clone(),
-            preco_minimo: produto.preco_minimo.clone(),
-            custo_medio: produto.custo_medio.clone(),
-            pis: produto.pis.clone(),
-            cofins: produto.cofins.clone(),
-            ncm: produto.ncm.clone(),
-            cest: produto.cest.clone(),
-            cod_ipi: produto.cod_ipi.clone(),
-            porcentagem_ipi: produto.porcentagem_ipi.clone(),
+            descricao: produto.descricao.to_string(),
+            codigo_de_barras: produto.codigo_de_barras,
+            icms: produto.icms,
+            unidade_medida: produto.unidade_medida,
+            preco_venda: produto.preco_venda,
+            preco_minimo: produto.preco_minimo,
+            custo_medio: produto.custo_medio,
+            pis: produto.pis,
+            cofins: produto.cofins,
+            ncm: produto.ncm,
+            cest: produto.cest,
+            cod_ipi: produto.cod_ipi,
+            porcentagem_ipi: produto.porcentagem_ipi,
         }
     }
 }
@@ -188,12 +191,8 @@ impl From<Vec<Produto>> for ProdutosResponse {
 ///Testes
 #[cfg(test)]
 pub mod tests {
-    use bigdecimal::FromPrimitive;
-
     use super::*;
     use crate::models::produto::tests::create_produto as model_create_produto;
-    use crate::models::produto::tests::create_produto_by_email as model_create_produto_by_email;
-    use crate::models::produto::delete as model_delete;
     use crate::tests::helpers::tests::{get_data_pool, get_pool};
 
     pub fn get_all_produtos() -> ProdutosResponse {
@@ -233,19 +232,20 @@ pub mod tests {
     #[actix_rt::test]
     async fn it_creates_a_produto() {
         let params = Json(CreateProdutoRequest {
-            descricao: "coca cola".into(),
+            descricao: "pepsi".into(),
             codigo_de_barras: Some("123456789".into()),
-            icms: Some("18".into()),
+            icms: Some("13".into()),
             unidade_medida: Some("un".into()),
-            preco_venda: None,
-            preco_minimo: None,
-            custo_medio: None,
-            pis: Some("1.65".into()),
-            cofins: Some("7.60".into()),
-            ncm: Some("22021000".into()),
-            cest: Some("1705600".into()),
-            cod_ipi: Some("999".into()),
-            porcentagem_ipi: None,
+            preco_venda: Some(2.5),
+            preco_minimo: Some(2.0),
+            custo_medio: Some(2.2),
+            pis: Some("1245".into()),
+            cofins: Some("123".into()),
+            ncm: Some("512".into()),
+            cest: Some("4612".into()),
+            cod_ipi: Some("123".into()),
+            porcentagem_ipi: Some(2.0),
+
         });
         let response = create_produto(get_data_pool(), Json(params.clone()))
             .await
@@ -257,33 +257,34 @@ pub mod tests {
 
     #[actix_rt::test]
     async fn it_updates_a_produto() {
-        let first_produto = model_create_produto_by_email("teste_handler_update@teste.com").unwrap();
+        let first_produto = model_create_produto().unwrap();
         let produto_id: Path<Uuid> = Path::from(first_produto.id);
         let params = Json(UpdateProdutoRequest {
-            descricao: "coca cola".into(),
-            codigo_de_barras: Some("123456789".into()),
-            icms: Some("18".into()),
-            unidade_medida: Some("un".into()),
-            preco_venda: None,
-            preco_minimo: None,
-            custo_medio: None,
-            pis: Some("1.65".into()),
-            cofins: Some("7.60".into()),
-            ncm: Some("22021000".into()),
-            cest: Some("1705600".into()),
-            cod_ipi: Some("999".into()),
-            porcentagem_ipi: None,
+            id: Uuid::parse_str(&first_produto.id).unwrap(),
+            descricao: first_produto.descricao.to_string(),
+            codigo_de_barras: first_produto.codigo_de_barras,
+            icms: first_produto.icms,
+            unidade_medida: first_produto.unidade_medida,
+            preco_venda: first_produto.preco_venda,
+            preco_minimo: first_produto.preco_minimo,
+            custo_medio: first_produto.custo_medio,
+            pis: first_produto.pis,
+            cofins: first_produto.cofins,
+            ncm: first_produto.ncm,
+            cest: first_produto.cest,
+            cod_ipi: first_produto.cod_ipi,
+            porcentagem_ipi: first_produto.porcentagem_ipi,
         });
         let response = update_produto(produto_id, get_data_pool(), Json(params.clone()))
             .await
             .unwrap();
-        assert_eq!(response.into_inner().descricao, params.descricao);
+        assert_eq!(response.into_inner().nome, params.nome);
         delete(&get_data_pool(), first_produto.id);
     }
 
     #[actix_rt::test]
     async fn it_deletes_a_produto() {
-        let created = model_create_produto_by_email("teste_handler_delete@teste.com");
+        let created = model_create_produto();
         let produto_id = created.unwrap().id;
         let produto_id_path: Path<Uuid> = produto_id.into();
         let produto = find(&get_pool(), produto_id);

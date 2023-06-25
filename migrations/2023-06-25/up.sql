@@ -1,0 +1,14 @@
+
+CREATE TABLE orcamento (
+  id VARCHAR(36) NOT NULL PRIMARY KEY,
+  created_by VARCHAR(36) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+
+
+insert into orcamento (id,
+created_by)
+VALUES
+('00000000-0000-0000-0000-000000000000',
+'00000000-0000-0000-0000-000000000000');

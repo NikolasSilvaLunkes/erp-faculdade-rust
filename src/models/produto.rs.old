@@ -1,4 +1,3 @@
-use crate::auth::hash;
 use crate::database::PoolType;
 use crate::errors::ApiError;
 use crate::handlers::produto::{ProdutoResponse, ProdutosResponse};
@@ -51,7 +50,7 @@ pub struct NewProduto {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, AsChangeset)]
-#[table_name = "produtos"]
+#[diesel(table_name = produtos)]
 pub struct UpdateProduto {
     pub id: String,
     pub descricao: String,
@@ -70,20 +69,14 @@ pub struct UpdateProduto {
     pub updated_by: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct AuthProduto {
-    pub id: String,
-    pub email: String,
-}
-
-/// Get all produtos
+/// Get all produto
 pub fn get_all(pool: &PoolType) -> Result<ProdutosResponse, ApiError> {
     use crate::schema::produtos::dsl::produtos;
 
     let mut conn = pool.get()?;
-    let all_produtos = produtos.load(&mut conn)?;
+    let all_produto = produtos.load(&mut conn)?;
 
-    Ok(all_produtos.into())
+    Ok(all_produto.into())
 }
 
 /// Find a produto by the produto's id or error out
@@ -159,14 +152,12 @@ impl From<NewProduto> for Produto {
 
 #[cfg(test)]
 pub mod tests {
-    use std::str::FromStr;
-
     use bigdecimal::FromPrimitive;
 
     use super::*;
     use crate::tests::helpers::tests::get_pool;
 
-    pub fn get_all_produtos() -> Result<ProdutosResponse, ApiError> {
+    pub fn get_all_produto() -> Result<ProdutosResponse, ApiError> {
         let pool = get_pool();
         get_all(&pool)
     }
@@ -175,43 +166,19 @@ pub mod tests {
         let produto_id = Uuid::new_v4();
         let new_produto = NewProduto {
             id: produto_id.to_string(),
-            descricao: "Model".to_string(),
-            codigo_de_barras: Some("1".to_string()),
-            icms: Some("1".to_string()),
-            unidade_medida: Some("UN".to_string()),
-            preco_venda: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            preco_minimo: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            custo_medio: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            pis: Some("1".to_string()),
+            descricao: "coca cola espumante".to_string(),
+            codigo_de_barras: Some("124523324123565421435".to_string()),
+            icms: Some("18".to_string()),
+            unidade_medida: Some("01".to_string()),
+            preco_venda: None,
+            preco_minimo: None,
+            custo_medio: None,
+            pis: Some("00".to_string()),
             cofins: Some("00".to_string()),
             ncm: Some("00".to_string()),
             cest: Some("00".to_string()),
             cod_ipi: Some("00".to_string()),
-            porcentagem_ipi: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            created_by: produto_id.to_string(),
-            updated_by: produto_id.to_string(),
-        };
-        let produto: Produto = new_produto.into();
-        create(&get_pool(), &produto)
-    }
-
-    pub fn create_produto_by_email(email: &str) -> Result<ProdutoResponse, ApiError> {
-        let produto_id = Uuid::new_v4();
-        let new_produto = NewProduto {
-            id: produto_id.to_string(),
-            descricao: "Model".to_string(),
-            codigo_de_barras: Some("1".to_string()),
-            icms: Some("1".to_string()),
-            unidade_medida: Some("UN".to_string()),
-            preco_venda: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            preco_minimo: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            custo_medio: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            pis: Some("1".to_string()),
-            cofins: Some("00".to_string()),
-            ncm: Some("00".to_string()),
-            cest: Some("00".to_string()),
-            cod_ipi: Some("00".to_string()),
-            porcentagem_ipi: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
+            porcentagem_ipi: None,
             created_by: produto_id.to_string(),
             updated_by: produto_id.to_string(),
         };
@@ -221,14 +188,14 @@ pub mod tests {
 
     #[test]
     fn it_gets_a_produto() {
-        let produtos = get_all_produtos();
-        assert!(produtos.is_ok());
+        let produto = get_all_produto();
+        assert!(produto.is_ok());
     }
 
     #[test]
     fn test_find() {
-        let produtos = get_all_produtos().unwrap();
-        let produto = &produtos.0[0];
+        let produto = get_all_produto().unwrap();
+        let produto = &produto.0[0];
         let found_produto = find(&get_pool(), produto.id).unwrap();
         assert_eq!(produto, &found_produto);
     }
@@ -253,22 +220,22 @@ pub mod tests {
 
     #[test]
     fn it_updates_a_produto() {
-        let created = create_produto_by_email("teste_model_update6@teste.com").unwrap();
+        let created = create_produto().unwrap();
         let update_produto = UpdateProduto {
             id: created.id.to_string(),
-            descricao: "Model".to_string(),
-            codigo_de_barras: Some("1".to_string()),
-            icms: Some("1".to_string()),
-            unidade_medida: Some("UN".to_string()),
-            preco_venda: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            preco_minimo: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            custo_medio: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            pis: Some("1".to_string()),
+            descricao: "coca cola espumante".to_string(),
+            codigo_de_barras: Some("124523324123565421435".to_string()),
+            icms: Some("18".to_string()),
+            unidade_medida: Some("01".to_string()),
+            preco_venda: None,
+            preco_minimo: None,
+            custo_medio: None,
+            pis: Some("00".to_string()),
             cofins: Some("00".to_string()),
             ncm: Some("00".to_string()),
             cest: Some("00".to_string()),
             cod_ipi: Some("00".to_string()),
-            porcentagem_ipi: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
+            porcentagem_ipi: None,
             updated_by: created.id.to_string(),
         };
         let updated = update(&get_pool(), &update_produto);
@@ -283,19 +250,19 @@ pub mod tests {
         let produto_id = Uuid::new_v4();
         let update_produto = UpdateProduto {
             id: produto_id.to_string(),
-            descricao: "Model".to_string(),
-            codigo_de_barras: Some("12345678901".to_string()),
-            icms: Some("123456789".to_string()),
-            unidade_medida: Some("123456789".to_string()),
-            preco_venda: Some(BigDecimal::from_str("1.00").unwrap()),
-            preco_minimo: Some(BigDecimal::from_str("1.00").unwrap()),
-            custo_medio: Some(BigDecimal::from_str("1.00").unwrap().with_scale(2)),
-            pis: Some("123456789".to_string()),
+            descricao: "coca cola espumante".to_string(),
+            codigo_de_barras: Some("124523324123565421435".to_string()),
+            icms: Some("18".to_string()),
+            unidade_medida: Some("01".to_string()),
+            preco_venda: None,
+            preco_minimo: None,
+            custo_medio: None,
+            pis: Some("00".to_string()),
             cofins: Some("00".to_string()),
             ncm: Some("00".to_string()),
             cest: Some("00".to_string()),
             cod_ipi: Some("00".to_string()),
-            porcentagem_ipi: Some(BigDecimal::from_str("1.00").unwrap()),
+            porcentagem_ipi: None,
             updated_by: produto_id.to_string(),
         };
         let updated = update(&get_pool(), &update_produto);
@@ -304,7 +271,7 @@ pub mod tests {
 
     #[test]
     fn it_deletes_a_produto() {
-        let created = create_produto_by_email("teste_model_delete@teste.com");
+        let created = create_produto();
         let produto_id = created.unwrap().id;
         let produto = find(&get_pool(), produto_id);
         assert!(produto.is_ok());

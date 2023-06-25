@@ -1,26 +1,26 @@
 
-CREATE TABLE produto (
+CREATE TABLE produtos (
   id VARCHAR(36) NOT NULL PRIMARY KEY,
   descricao VARCHAR(100) NOT NULL,
   codigo_de_barras VARCHAR(50),
   icms VARCHAR(12),
   unidade_medida CHAR(2),
-  preco_venda DECIMAL,
-  preco_minimo DECIMAL,
-  custo_medio DECIMAL,
+  preco_venda DECIMAL(15,2),
+  preco_minimo DECIMAL(15,2),
+  custo_medio DECIMAL(15,2),
   pis VARCHAR(4),
   cofins VARCHAR(4),
   ncm VARCHAR(8),
   cest VARCHAR(12),
   cod_ipi VARCHAR(12),
-  porcentagem_ipi DECIMAL,
+  porcentagem_ipi DECIMAL(15,2),
   created_by VARCHAR(36) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_by VARCHAR(36) NOT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-insert into produto (id,
+insert into produtos (id,
 descricao, 
 codigo_de_barras,
 icms,
